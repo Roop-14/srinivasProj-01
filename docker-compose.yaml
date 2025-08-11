@@ -1,0 +1,37 @@
+
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 140793
+
+    ports:
+      - '3306:3306'   # expose MySQL directly on host's 3306
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  booking-service:
+    image: booking-service-img
+    build: ./booking-service
+    container_name: booking-service
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    ports:
+      - '8080:8080'
+
+  payment-service:
+    image: payment-service-img
+    build: ./payment-service
+    container_name: payment-service
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    ports:
+      - '9091:9091'
