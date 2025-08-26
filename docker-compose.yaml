@@ -23,8 +23,8 @@ services:
     depends_on:
       mysqldb:
         condition: service_healthy
-    ports:
-      - '8080:8080'
+   # ports:
+    #  - '8080:8080'
 
   payment-service:
     image: payment-service-img
@@ -33,5 +33,21 @@ services:
     depends_on:
       mysqldb:
         condition: service_healthy
+  #  ports:
+   #   - '9091:9091'
+
+
+  Api-Gateway:
+    image: api-gateway-img
+    container_name: api_gateway
+    build: ./Api-Gateway
     ports:
-      - '9091:9091'
+      - '8765:8765'
+
+  movie-services-registry:
+    image: eureka_registry-img
+    container_name: eureka_container
+    build: ./movies-services-registry
+    ports:
+      - '8761:8761'
+
