@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  init-kafka:
+    image: confluentinc/cp-kafka:7.0.1
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      echo "⏳ Waiting for Kafka brokers..."
+      cub kafka-ready -b kafka-broker-1:9092 1 30
+      cub kafka-ready -b kafka-broker-2:9092 1 30
+      cub kafka-ready -b kafka-broker-3:9092 1 30
+
+      echo "🗑️ Deleting old topics..."
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --delete --topic payment-request --if-exists
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --delete --topic payment-response --if-exists
+
+      echo "📌 Creating topics..."
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --create --topic payment-request --partitions 3 --replication-factor 3
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --create --topic payment-response --partitions 3 --replication-factor 3
+
+      echo "✅ Topics created:"
+      kafka-topics --bootstrap-server kafka-broker-1:9092 --list
